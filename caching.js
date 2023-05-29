@@ -1,5 +1,6 @@
 const redis = require("redis");
 const Redis = require('ioredis');
+require('dotenv').config();
 
 // Environment variables for cache
 const cacheHostName = process.env.cacheHostName;

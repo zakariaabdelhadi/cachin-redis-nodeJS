@@ -1,6 +1,7 @@
 const express = require('express')
 const redis = require("redis");
 const Redis = require('ioredis');
+require('dotenv').config();
 
 const router = express.Router();
 //import fetch from "node-fetch";
