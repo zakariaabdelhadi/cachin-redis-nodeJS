@@ -1,4 +1,4 @@
 node_modules
 credentials.ps1
-credentials.env
+.env
 

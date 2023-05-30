@@ -6,7 +6,7 @@ require('dotenv').config();
 const router = express.Router();
 //import fetch from "node-fetch";
 const fetch = require('node-fetch');
-const { testCache, connectToCache, disconnectFromCache } = require('./caching')
+const { testCache, connectToCache } = require('./caching')
 
 //const REDIS_ACCESS_KEY = 'CrhX48OigkR6H9HK3xkz34SeaSYR696NcAzCaITW4RA';
 //const REDIS_HOST_NAME = 'tp-cloud.redis.cache.windows.net';
@@ -14,8 +14,15 @@ const OPEN_WEATHER_API = 'd11ad90a4ab6e0b72bf65e5ce7970f92';
 
 
 
-router.get("/wetter-current", (req, res) => {
+router.get("/wetter-current", async (req, res) => {
 
+
+
+    let x = await connectToCache();
+    console.log(await x.ping());
+
+
+    // console.log(x.ping());
     // install node-fetch module
     //this link is to use for forecast 
     let stadt = 'berlin'
@@ -35,6 +42,7 @@ router.get("/wetter-current", (req, res) => {
 
         });
 
+    x.disconnect();
 });
 
 function get_currentTime() {

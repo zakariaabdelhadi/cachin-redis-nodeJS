@@ -6,8 +6,29 @@ require('dotenv').config();
 const cacheHostName = process.env.cacheHostName;
 const cachePassword = process.env.cachePassword;
 
-if (!cacheHostName) throw Error("REDIS_HOST_NAME is empty")
+
 if (!cachePassword) throw Error("REDIS_ACCESS_KEY is empty")
+if (!cacheHostName) throw Error("REDIS_HOST_NAME is empty")
+
+
+
+async function connectToCache() {
+
+    // Connection configuration
+    const cacheConnection = redis.createClient({
+        // rediss for TLS
+        url: `rediss://${cacheHostName}:6380`,
+        password: cachePassword
+    });
+
+    // Connect to Redis
+    await cacheConnection.connect();
+
+    return cacheConnection;
+
+
+}
+
 
 async function testCache() {
 
@@ -61,27 +82,6 @@ async function testCache() {
 }
 
 
-async function connectToCache() {
-
-    // Connection configuration
-    const cacheConnection = redis.createClient({
-        // rediss for TLS
-        url: `rediss://${cacheHostName}:6380`,
-        password: cachePassword
-    });
-
-    // Connect to Redis
-    await cacheConnection.connect();
-
-
-}
-
-
-async function disconnectFromCache() {
-
-    // Disconnect
-    // cacheConnection.disconnect()
-
-}
-
-module.exports = { testCache, connectToCache, disconnectFromCache };
+//testCache().then((result) => console.log(result)).catch(ex => console.log(ex));
+//connectToCache().then((result) => console.log(result)).catch(ex => console.log(ex));
+module.exports = { testCache, connectToCache };
