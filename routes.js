@@ -16,6 +16,7 @@ router.get("/wetter-current", cach, async (req, res) => {
 
 });
 
+
 //Middleware für cachcheck
 async function cach(req, res, next) {
 
@@ -126,3 +127,4 @@ async function cachLeeren() {
 }
 
 module.exports = router;
+//
