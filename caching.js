@@ -1,11 +1,13 @@
 const redis = require("redis");
 const Redis = require('ioredis');
-require('dotenv').config();
+const envrmnt = require('dotenv')
+
+envrmnt.config();
+
 
 // Environment variables for cache
 const cacheHostName = process.env.cacheHostName;
 const cachePassword = process.env.cachePassword;
-
 
 if (!cachePassword) throw Error("REDIS_ACCESS_KEY is empty")
 if (!cacheHostName) throw Error("REDIS_HOST_NAME is empty")
@@ -13,7 +15,6 @@ if (!cacheHostName) throw Error("REDIS_HOST_NAME is empty")
 
 
 async function connectToCache() {
-
     // Connection configuration
     const cacheConnection = redis.createClient({
         // rediss for TLS
@@ -25,9 +26,15 @@ async function connectToCache() {
     await cacheConnection.connect();
 
     return cacheConnection;
-
-
 }
+
+module.exports = { connectToCache };
+
+
+
+
+/*
+
 
 
 async function testCache() {
@@ -82,6 +89,9 @@ async function testCache() {
 }
 
 
+
+
+
 //testCache().then((result) => console.log(result)).catch(ex => console.log(ex));
 //connectToCache().then((result) => console.log(result)).catch(ex => console.log(ex));
-module.exports = { testCache, connectToCache };
+*/

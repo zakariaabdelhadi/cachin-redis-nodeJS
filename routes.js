@@ -1,50 +1,98 @@
 const express = require('express')
-const redis = require("redis");
-const Redis = require('ioredis');
-require('dotenv').config();
-
 const router = express.Router();
-//import fetch from "node-fetch";
 const fetch = require('node-fetch');
-const { testCache, connectToCache } = require('./caching')
-
-//const REDIS_ACCESS_KEY = 'CrhX48OigkR6H9HK3xkz34SeaSYR696NcAzCaITW4RA';
-//const REDIS_HOST_NAME = 'tp-cloud.redis.cache.windows.net';
-const OPEN_WEATHER_API = 'd11ad90a4ab6e0b72bf65e5ce7970f92';
+const { connectToCache } = require('./caching')
 
 
 
-router.get("/wetter-current", async (req, res) => {
+router.get("/wetter-current", cach, async (req, res) => {
 
+    let stadt = req.query.stadt;
+    let unit = req.query.unit;
+    let client = await connectToCache();
 
+    console.log(await client.ping());
+    await getWeatherFromAPI(req, res, stadt, unit, client)
 
-    let x = await connectToCache();
-    console.log(await x.ping());
+});
 
+//Middleware für cachcheck
+async function cach(req, res, next) {
 
-    // console.log(x.ping());
-    // install node-fetch module
-    //this link is to use for forecast 
-    let stadt = 'berlin'
-    let apiLink = 'https://api.openweathermap.org/data/2.5/weather?q=' + stadt + '&appid=' + process.env.OPEN_WEATHER_API + '&units=metric';
-    fetch(apiLink)
-        .then(fetchres => fetchres.json())
-        .then(json => {
-            res.json(
-                {
+    let stadt = req.query.stadt;
+    let unit = req.query.unit;
+    let client = await connectToCache();
+
+    // await client.flushAll();
+    let dataFromCach = await client.get(stadt + unit, (err, reply) => {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log(reply);
+            const deserializedObject = JSON.parse(reply);
+            return deserializedObject;
+        }
+    });
+
+    if (dataFromCach) {
+        let datacach = JSON.parse(dataFromCach);
+        res.render('index', { data: datacach });
+        // res.json(JSON.parse(dataFromCach));
+    } else {
+        next();
+    }
+}
+
+async function getWeatherFromAPI(req, res, stadt, unit, client) {
+
+    let apiLink = `https://api.openweathermap.org/data/2.5/weather?q=${stadt}&appid=${process.env.OPEN_WEATHER_API}&units=${unit}`
+    try {
+
+        console.log('try to fetching Data from API ...')
+        fetch(apiLink)
+            .then(async fetchres => fetchres.json())
+            .then(async json => {
+
+                let data = {
                     dt: unix_to_date(json.dt),
                     date: get_currentTime(),
                     temperatur: json.main.temp, // celcius
                     Luftfeuchtigkeit: json.main.humidity, // porcentage
                     Windgeschwindigkeit: json.wind.speed // meter per sekunde
 
-                });
+                }
 
-        });
+                await PutToCache(client, stadt + unit, data);
+                res.render('index', { data: data });
+                //  res.json(data);
 
-    x.disconnect();
-});
 
+            });
+
+    } catch (error) {
+        res.status(500).send('Internal server Error')
+    }
+}
+
+
+async function PutToCache(cacheConnection, key, value) {
+
+    let delai = 15 - (new Date(get_currentTime()).getMinutes() - new Date(value.dt).getMinutes());
+    console.log(delai);
+
+    await cacheConnection.set(key, JSON.stringify(value), 'EX', delai * 60, async (err, reply) => {
+        if (err) {
+            console.error(err);
+        } else {
+            await console.log('data stored in Redis ...');
+            await console.log('Reply: ' + reply);
+            cacheConnection.disconnect();
+
+        }
+    });
+    setInterval(cachLeeren, delai * 60 * 1000)
+
+}
 function get_currentTime() {
 
     const now = new Date();
@@ -70,4 +118,11 @@ function unix_to_date(dt) {
 
 
 }
+
+async function cachLeeren() {
+
+    let client = await connectToCache();
+    client.flushAll();
+}
+
 module.exports = router;

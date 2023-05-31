@@ -6,9 +6,7 @@ const path = require('path');
 const logger = (req, res, next) => {
     //console.log(path.join(req.protocol,"/",req.hostname));
     console.log('request to retrieve current wetter daten ..'),
-        console.log('Api Key : ' + process.env.OPEN_WEATHER_API);
-
-    next();
+        next();
 };
 
 module.exports = logger;

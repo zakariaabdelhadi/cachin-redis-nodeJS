@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Wetterdaten</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-image: url('https://img.freepik.com/vektoren-premium/satz-von-wettersymbolen-glasmorphismus-stilsymbole-fuer-meteo-vorhersage-app-elemente-isoliert-auf-weissem-hintergrund-tag-und-nacht-sommer-fruehling-herbstsaison-singt-sonne-regenwolken-vektorillustrationen_190776-2985.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: green;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Wetterdaten</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>current Datum</th>
+                <th>Temperatur</th>
+                <th>Luftfeuchtigkeit</th>
+                <th>Windgeschwindigkeit</th>
+            </tr>
+        </thead>
+        <tbody id="weatherData">
+        </tbody>
+    </table>
+
+    <script data-data="<%= JSON.stringify(data) %>">
+        // Beispiel-Wetterdaten als JSON-Objekt
+        const weatherData = [
+            JSON.parse(document.currentScript.dataset.data)
+
+            // Weitere Wetterdaten hier hinzufügen...
+        ];
+
+        // Funktion zum Erstellen der Wetterdaten-Tabelle
+        function createWeatherTable() {
+            const tableBody = document.getElementById('weatherData');
+
+            weatherData.forEach(data => {
+                const row = document.createElement('tr');
+                const dateCell = document.createElement('td');
+                const currentdateCell = document.createElement('td');
+                const tempCell = document.createElement('td');
+                const humidityCell = document.createElement('td');
+                const windCell = document.createElement('td');
+
+                dateCell.textContent = data.dt;
+                currentdateCell.textContent = data.date;
+                tempCell.textContent = data.temperatur + '°C';
+                humidityCell.textContent = data.Luftfeuchtigkeit + '%';
+                windCell.textContent = data.Windgeschwindigkeit + ' m/s';
+
+                row.appendChild(dateCell);
+                row.appendChild(currentdateCell);
+                row.appendChild(tempCell);
+                row.appendChild(humidityCell);
+                row.appendChild(windCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Aufruf der Funktion zum Erstellen der Wetterdaten-Tabelle
+        createWeatherTable();
+    </script>
+</body>
+
+</html>
